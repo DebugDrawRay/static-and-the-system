@@ -39,7 +39,7 @@ public class flyer : MonoBehaviour
     void followController()
     {
         Vector2 currentTargetDir = direction(_player, this.gameObject);
-        rigid.AddForce(currentTargetDir * properties.moveSpeed);//this gonna break yo, fix yo shit
+        rigid.AddForce(currentTargetDir * properties.moveSpeed);//this gonna break yo, fix yo shit(fixed with angular drag for the moment, revisit?)
     } 
     
     bool targetInSight()

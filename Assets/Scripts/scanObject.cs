@@ -7,31 +7,39 @@ public class scanObject : MonoBehaviour
     public GameObject label;
     public bool activeState;
     public string[] scanableObjects;
+
+    private SpriteRenderer sprite;
+    private player _player;
     void Awake()
     {
-        GetComponent<SpriteRenderer>().enabled = activeState;
+        sprite = GetComponent<SpriteRenderer>();
+        sprite.enabled = activeState;
+    }
+    void Start()
+    {
+        _player = player.Instance;
     }
 
     public void toggleActive()
     {
         activeState = !activeState;
-        GetComponent<SpriteRenderer>().enabled = activeState;
+        sprite.enabled = activeState;
     }
+
     void OnTriggerStay2D(Collider2D hit)
     {
-        foreach (string scanable in scanableObjects)
+        objectData data = hit.gameObject.GetComponent<objectData>();
+        if (data)
         {
-            if (hit.gameObject.tag == scanable)
-            {
-                hit.gameObject.SendMessage("labelActive", activeState, SendMessageOptions.DontRequireReceiver);
-                player.Instance.scannedObjects.Add(hit.gameObject);
-            }
+            data.labelActive(activeState);
         }
-     
     }
     void OnTriggerExit2D(Collider2D hit)
     {
-        hit.gameObject.SendMessage("labelActive", false, SendMessageOptions.DontRequireReceiver);
-        player.Instance.scannedObjects.Remove(hit.gameObject);
+        objectData data = hit.gameObject.GetComponent<objectData>();
+        if (data)
+        {
+            data.labelActive(false);
+        }
     }
 }

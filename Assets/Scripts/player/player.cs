@@ -40,10 +40,16 @@ public class player : MonoBehaviour
 
     [Header("Scanner Control")]
     public GameObject scanObject;
+    public GameObject recObject;
+
     public Vector2 scanRelPos;
+    public Vector2 recordRelPos;
+
     private GameObject scanner;
-    public List<GameObject> scannedObjects;
+    private GameObject recorder;
+
     public GameObject recordedObject;
+    public GameObject recordableObject;
 
     [Header("Damage Source Reaction")]
     public float knockbackForce;
@@ -90,6 +96,7 @@ public class player : MonoBehaviour
         currentKnockbackLength = knockbackLength;
         lastDir = 1;
         scanner = Instantiate(scanObject, transform.position, Quaternion.identity) as GameObject;
+        recorder = Instantiate(recObject, transform.position + transform.right, Quaternion.identity) as GameObject;
     }
 
     public static player Instance
@@ -253,31 +260,32 @@ public class player : MonoBehaviour
         {
             obj.toggleActive();
         }
-        if (obj.activeState)
-        {
-            recordController();
-        }
         Vector2 anchor = scanRelPos + new Vector2(transform.position.x, transform.position.y);
         scanner.transform.position = anchor;
     }
 
     void recordController()
     {
+        recorderObject obj = recorder.GetComponent<recorderObject>();
         if (record)
         {
-            if (recordedObject == null && scannedObjects != null)
+            if (recordedObject == null && recordableObject != null)
             {
-                //recordObject(scannedObjects);
+                recordObject(recordableObject);
             }
-            else
+            else if(recordedObject != null)
             {
                 replayObject(recordedObject);
             }
         }
+        Vector2 origin = new Vector2(transform.position.x, transform.position.y);
+        Vector2 anchor = origin + (recordRelPos * lastDir);
+        recorder.transform.position = anchor;
     }
 
     void recordObject(GameObject target)
     {
+        target.GetComponent<objectData>().labelActive(false);
         recordedObject = target;
         recordedObject.SetActive(false);
     }
@@ -394,6 +402,7 @@ public class player : MonoBehaviour
         jumpController();
         dashController(Vector2.right * lastDir);
         scanController();
+        recordController();
     }
     void jumpedState()
     {

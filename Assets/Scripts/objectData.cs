@@ -14,10 +14,12 @@ public class objectData : MonoBehaviour
     public string name;
     public string description;
 
+    public string scanObjectTag;
+
     public GameObject label;
     private GameObject currentLabel;
 
-   void Start()
+    void Start()
     {
         currentLabel = Instantiate(label, transform.position, Quaternion.identity) as GameObject;
         currentLabel.GetComponent<dataLabel>().anchorObj = this.gameObject;
@@ -25,7 +27,7 @@ public class objectData : MonoBehaviour
     }
 
     public void labelActive(bool active)
-   {
-       currentLabel.SetActive(active);
-   }
+    {
+        currentLabel.SetActive(active);
+    }
 }
