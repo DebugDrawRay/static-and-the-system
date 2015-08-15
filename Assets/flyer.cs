@@ -7,12 +7,13 @@ public class flyer : MonoBehaviour
     private stateContainer activeState;
     private Rigidbody2D rigid;
     private enemy properties;
-    private Vector2 currentTargetDir;
+    private GameObject _player;
     public LayerMask sightBlockers;
     void initializeComponents()
     {
         rigid = GetComponent<Rigidbody2D>();
         properties = GetComponent<enemy>();
+        _player = player.Instance.gameObject;
     }
 
     void Awake()
@@ -27,25 +28,27 @@ public class flyer : MonoBehaviour
     void Update()
     {
         stateMachine();
-        currentTargetDir = trackTarget(player.Instance.gameObject);
     }
     
-    Vector2 trackTarget(GameObject target)
+    Vector2 direction(GameObject target, GameObject origin)
     {
         Vector2 targetPos = new Vector2(target.transform.position.x, target.transform.position.y);
-        Vector2 currentPos = new Vector2(transform.position.x, transform.position.y);
+        Vector2 currentPos = new Vector2(origin.transform.position.x, origin.transform.position.y);
         return targetPos - currentPos;
     }
     void followController()
     {
+        Vector2 currentTargetDir = direction(_player, this.gameObject);
         rigid.AddForce(currentTargetDir * properties.moveSpeed);//this gonna break yo, fix yo shit
     } 
     
     bool targetInSight()
     {
         Vector2 currentPos = new Vector2(transform.position.x, transform.position.y);
+        Vector2 currentTargetDir = direction(_player, this.gameObject);
         RaycastHit2D inSight = Physics2D.Raycast(currentPos, currentTargetDir, Mathf.Infinity, sightBlockers);
         Debug.DrawRay(currentPos, currentTargetDir);
+        Debug.Log(inSight.collider.name);
         if(inSight.collider.gameObject.tag == player.Instance.gameObject.tag)
         {
             return true;

@@ -42,7 +42,7 @@ public class player : MonoBehaviour
     public GameObject scanObject;
     public Vector2 scanRelPos;
     private GameObject scanner;
-    public GameObject selectedObject;
+    public List<GameObject> scannedObjects;
     public GameObject recordedObject;
 
     [Header("Damage Source Reaction")]
@@ -123,7 +123,6 @@ public class player : MonoBehaviour
         runListeners();
         stateMachine();
         animStateMachine();
-        currentState();
     }
 
     void runListeners()
@@ -266,9 +265,9 @@ public class player : MonoBehaviour
     {
         if (record)
         {
-            if (recordedObject == null && selectedObject != null)
+            if (recordedObject == null && scannedObjects != null)
             {
-                recordObject(selectedObject);
+                //recordObject(scannedObjects);
             }
             else
             {
@@ -464,19 +463,15 @@ public class player : MonoBehaviour
                 activeState = jumpedState;
             }
         }
+
+        if(activeState != null)
+        {
+            activeState();
+        }
     }
 
     void animStateMachine()
     {
         movementAnimController();
     }
-    public void currentState()
-    {
-        if (activeState != null)
-        {
-            activeState();
-        }
-    }
-
-
 }

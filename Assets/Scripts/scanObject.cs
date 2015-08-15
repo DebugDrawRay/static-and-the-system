@@ -1,4 +1,4 @@
-﻿ using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -6,7 +6,7 @@ public class scanObject : MonoBehaviour
 {
     public GameObject label;
     public bool activeState;
-    
+    public string[] scanableObjects;
     void Awake()
     {
         GetComponent<SpriteRenderer>().enabled = activeState;
@@ -19,16 +19,19 @@ public class scanObject : MonoBehaviour
     }
     void OnTriggerStay2D(Collider2D hit)
     {
-        if (hit.gameObject.tag == "Finish")
+        foreach (string scanable in scanableObjects)
         {
-            hit.gameObject.SendMessage("labelActive", activeState, SendMessageOptions.DontRequireReceiver);
-            player.Instance.selectedObject = hit.gameObject;
+            if (hit.gameObject.tag == scanable)
+            {
+                hit.gameObject.SendMessage("labelActive", activeState, SendMessageOptions.DontRequireReceiver);
+                player.Instance.scannedObjects.Add(hit.gameObject);
+            }
         }
      
     }
     void OnTriggerExit2D(Collider2D hit)
     {
         hit.gameObject.SendMessage("labelActive", false, SendMessageOptions.DontRequireReceiver);
-        player.Instance.selectedObject = null;
+        player.Instance.scannedObjects.Remove(hit.gameObject);
     }
 }
