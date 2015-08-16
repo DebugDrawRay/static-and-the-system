@@ -47,8 +47,7 @@ public class flyer : MonoBehaviour
         Vector2 currentPos = new Vector2(transform.position.x, transform.position.y);
         Vector2 currentTargetDir = direction(_player, this.gameObject);
         RaycastHit2D inSight = Physics2D.Raycast(currentPos, currentTargetDir, Mathf.Infinity, sightBlockers);
-        Debug.DrawRay(currentPos, currentTargetDir);
-        Debug.Log(inSight.collider.name);
+
         if(inSight.collider.gameObject.tag == player.Instance.gameObject.tag)
         {
             return true;
