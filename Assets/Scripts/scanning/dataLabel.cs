@@ -36,8 +36,15 @@ public class dataLabel : MonoBehaviour
 
     void anchorTo(GameObject obj)
     {
-        Vector3 offset = new Vector3(0, _positionOffset, 0);
-        Vector3 anchorPos = obj.transform.position + offset;
-        transform.position = anchorPos;
+        if (obj)
+        {
+            Vector3 offset = new Vector3(0, _positionOffset, 0);
+            Vector3 anchorPos = obj.transform.position + offset;
+            transform.position = anchorPos;
+        }
+        else
+        {
+            Destroy(this.gameObject);
+        }
     }
 }
