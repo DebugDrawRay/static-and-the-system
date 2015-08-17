@@ -15,14 +15,7 @@ public class status : MonoBehaviour
 
     void Update()
     {
-        if(currentHealth <= 0)
-        {
-            currentHealthContainers--;
-            if (currentHealthContainers <= 0)
-            {
-                deathEvent();
-            }
-        }
+  
     }
 
     public void deathEvent()
@@ -30,8 +23,31 @@ public class status : MonoBehaviour
         Destroy(this.gameObject);
     }
 
-    public void changeStatus(float damage)
+    public void changeStatus(float health)
     {
-        currentHealth -= damage;
+        float healthDif = Mathf.Abs(currentHealth - (currentHealth + health));
+        currentHealth += health;
+
+        if (currentHealth <= 0)
+        {
+            if (currentHealthContainers <= 0)
+            {
+                deathEvent();
+            }
+            else
+            {
+                currentHealthContainers--;
+                currentHealth = maxHealth - healthDif;
+            }
+        }
+
+        if (currentHealth >= maxHealth)
+        {
+            if(currentHealthContainers < maxHealthContainers)
+            {
+                currentHealthContainers++;
+            }
+            currentHealth = currentHealth - maxHealth;
+        } 
     }
 }

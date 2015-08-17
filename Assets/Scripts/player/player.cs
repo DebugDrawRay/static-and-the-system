@@ -245,7 +245,7 @@ public class player : MonoBehaviour
     }
     void jumpAction(Vector2 jumpVector)
     {
-        Debug.Log("adding force");
+
         Vector2 force = jumpVector * jumpVel;
         
         //rigid.AddForce(force);
@@ -316,9 +316,7 @@ public class player : MonoBehaviour
         if (tagMatch(damageSourceTags, hit.gameObject.tag))
         {
             knockback = true;
-            knockbackDir = hit.gameObject.transform.position - transform.position;
-            currentStatus.changeStatus(10);
-            
+            knockbackDir = hit.gameObject.transform.position - transform.position;  
         }
     }
     bool checkGrounded()
