@@ -20,6 +20,11 @@ public class status : MonoBehaviour
 
     public void deathEvent()
     {
+        enemy isEnemy = GetComponent<enemy>();
+        if(isEnemy)
+        {
+            isEnemy.dropPickups();
+        }
         Destroy(this.gameObject);
     }
 
@@ -46,8 +51,12 @@ public class status : MonoBehaviour
             if(currentHealthContainers < maxHealthContainers)
             {
                 currentHealthContainers++;
+                currentHealth = currentHealth - maxHealth;
             }
-            currentHealth = currentHealth - maxHealth;
+            else
+            {
+                currentHealth = maxHealth;
+            }
         } 
     }
 }

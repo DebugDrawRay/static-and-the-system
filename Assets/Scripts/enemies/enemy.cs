@@ -10,6 +10,10 @@ public class enemy : MonoBehaviour
     public Sprite[] sprites;
     public bool contactDamage;
 
+    public int dropRate;
+    public int dropMaxAmount;
+    public GameObject[] pickupDrops;
+
     void OnTriggerEnter2D(Collider2D hit)
     {
         if(contactDamage)
@@ -22,6 +26,23 @@ public class enemy : MonoBehaviour
                     {
                         hit.GetComponent<status>().changeStatus(baseDamage);
                     }
+                }
+            }
+        }
+    }
+
+    public void dropPickups()
+    {
+        int willDrop = Random.Range(0, 1 / dropRate);
+
+        if (willDrop == 0)
+        {
+            foreach (GameObject drop in pickupDrops)
+            {
+                int dropAmount = Random.Range(1, dropMaxAmount);
+                for(int i = 1; i <= dropAmount; i++)
+                {
+                    Instantiate(drop, transform.position, Quaternion.identity);
                 }
             }
         }
