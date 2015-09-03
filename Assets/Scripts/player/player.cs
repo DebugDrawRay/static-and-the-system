@@ -22,6 +22,7 @@ public class player : MonoBehaviour
 
     [Header("Jump Control")]
     public float jumpVel;
+    public float wallJumpVelMod;
     private bool jumpPlay;
     public float jumpHold;
     public float jumpHoldMax;
@@ -34,6 +35,7 @@ public class player : MonoBehaviour
     [Header("Collision Control")]
     public LayerMask jumpableLayers;
     public float jumpCheckBuffer;
+    public float wallJumpCheckMod;
     public string[] damageSourceTags;
 
     private Vector3 knockbackDir;
@@ -58,11 +60,12 @@ public class player : MonoBehaviour
     public Color damageColor;
 
     [Header("Animation Arrays")]
-    public Sprite[] movementSprites;
+    public AnimationClip[] idleAnimations;
     
     //components
     private Rigidbody2D rigid;
     private SpriteRenderer currentSprite;
+    private Animator anim;
     private status currentStatus;
 
     //inputs - get definitions within inputs.cs
@@ -76,13 +79,14 @@ public class player : MonoBehaviour
     private bool record;
     private bool dash;
     //virtual inputs
-    private bool knockback;
+    public bool knockback;
 
     void initializeComponents()
     {
         rigid = GetComponent<Rigidbody2D>();
         currentSprite = GetComponent<SpriteRenderer>();
         currentStatus = GetComponent<status>();
+        anim = GetComponent<Animator>();
     }
 
     void initializeClasses()
@@ -130,6 +134,7 @@ public class player : MonoBehaviour
         runListeners();
         stateMachine();
         animStateMachine();
+        Debug.Log(rigid.velocity);
     }
 
     void runListeners()
@@ -178,12 +183,13 @@ public class player : MonoBehaviour
     //movement 
     void movementController()
     {
-        Vector3 startVel = rigid.velocity;
-        Vector3 newVel = (transform.right * hor) * moveSpeed;
-        Vector3 vel = Vector3.Lerp(startVel, newVel, moveAccel);
-        vel.y = rigid.velocity.y;
-        rigid.velocity = vel;
+            Vector3 startVel = rigid.velocity;
+            Vector3 newVel = (transform.right * hor) * moveSpeed;
+            Vector3 vel = Vector3.Lerp(startVel, newVel, moveAccel);
+            vel.y = rigid.velocity.y;
+            rigid.velocity = vel;
     }
+
     void dashController(Vector3 dir)
     {
         if (dash)
@@ -225,15 +231,16 @@ public class player : MonoBehaviour
         {
             if (jumpHold < jumpHoldMax)
             {
-                //Debug.Log("Dun fucked");
                 if (jumpInput)
                 {
-                    jumpAction(Vector2.up);
+                    Vector2 force = Vector2.up * jumpVel;
+                    force.x = rigid.velocity.x;
+                    jumpAction(force);
                 }
-                else if (wallJumpInput)
+                else if (wallJumpInput && hor != 0)
                 {
-                    Vector2 jumpVect = Vector2.up + (-Vector2.right * lastDir);
-                    jumpAction(jumpVect);
+                    Vector2 jumpVect = (Vector2.up + (-Vector2.right * lastDir)) * jumpVel;
+                    jumpAction(jumpVect/wallJumpVelMod);
                 }
             }
         }
@@ -245,11 +252,7 @@ public class player : MonoBehaviour
     }
     void jumpAction(Vector2 jumpVector)
     {
-
-        Vector2 force = jumpVector * jumpVel;
-        
-        //rigid.AddForce(force);
-        rigid.velocity = new Vector2(rigid.velocity.x, force.y);
+        rigid.velocity = jumpVector;
     }
 
     //Scanning and recording interactions
@@ -346,10 +349,13 @@ public class player : MonoBehaviour
         Vector2 lDir = -Vector2.right;
         Vector2 rDir = Vector2.right;
         Vector2 size = GetComponent<Collider2D>().bounds.size;
+        size.y = size.y / wallJumpCheckMod;
+        Debug.Log(size);
         RaycastHit2D checkHitL = Physics2D.BoxCast(pos, size, 0, lDir, jumpCheckBuffer, jumpableLayers);
         RaycastHit2D checkHitR = Physics2D.BoxCast(pos, size, 0, rDir, jumpCheckBuffer, jumpableLayers);
         if ((checkHitL && checkHitL.collider != null) || (checkHitR && checkHitR.collider != null))
         {
+            Debug.Log("walled");
             if (!jump)
             {
                 jumpHold = 0;
@@ -415,6 +421,10 @@ public class player : MonoBehaviour
         movementController();
         scanController();
     }
+    void wallJumpState()
+    {
+
+    }
     void dashState()
     {
         dashController(Vector2.right * lastDir);
@@ -425,18 +435,7 @@ public class player : MonoBehaviour
         knockbackController();
     }
 
-    //animation controller
-    void movementAnimController()
-    {
-        if (lastDir == -1)
-        {
-            currentSprite.sprite = movementSprites[0];
-        }
-        if (lastDir == 1)
-        {
-            currentSprite.sprite = movementSprites[1];
-        }
-    }
+    //animation controllers
     //state control
     void stateMachine()
     {
@@ -479,6 +478,14 @@ public class player : MonoBehaviour
 
     void animStateMachine()
     {
-        movementAnimController();
+        anim.SetFloat("Direction", lastDir);
+        if (hor != 0)
+        {
+            anim.SetBool("isMoving", true);
+        }
+        else
+        {
+            anim.SetBool("isMoving", false);
+        }
     }
 }

@@ -3,13 +3,18 @@ using System.Collections;
 
 public class enemy : MonoBehaviour 
 {
+    [Header("Collisions")]
     public string[] hostileTags;
     public LayerMask ground;
+
+    [Header("Properties")]
     public float moveSpeed;
     public float baseDamage;
     public Sprite[] sprites;
     public bool contactDamage;
 
+    [Header("Item Drops")]
+    
     public int dropRate;
     public int dropMaxAmount;
     public GameObject[] pickupDrops;
@@ -33,8 +38,9 @@ public class enemy : MonoBehaviour
 
     public void dropPickups()
     {
-        int willDrop = Random.Range(0, 1 / dropRate);
+        int willDrop = Random.Range(0, dropRate);
 
+        Debug.Log(willDrop);
         if (willDrop == 0)
         {
             foreach (GameObject drop in pickupDrops)
@@ -42,7 +48,9 @@ public class enemy : MonoBehaviour
                 int dropAmount = Random.Range(1, dropMaxAmount);
                 for(int i = 1; i <= dropAmount; i++)
                 {
-                    Instantiate(drop, transform.position, Quaternion.identity);
+                    Vector2 cir = Random.insideUnitCircle + Vector2.up;
+                    Vector2 pos = new Vector2(transform.position.x, transform.position.y) + cir;
+                    Instantiate(drop, pos, Quaternion.identity);
                 }
             }
         }

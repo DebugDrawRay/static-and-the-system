@@ -8,6 +8,8 @@ public class flyer : MonoBehaviour
     private Rigidbody2D rigid;
     private enemy properties;
     private GameObject _player;
+
+    [Header("Tracking")]
     public LayerMask sightBlockers;
     void initializeComponents()
     {

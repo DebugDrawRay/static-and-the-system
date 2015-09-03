@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 public class healthMeterUI : MonoBehaviour
 {
+    [Header("Assets")]
     public Image healthMeter;
     public Text healthMeterText;
     public Image healthMeterBg;
@@ -12,14 +13,22 @@ public class healthMeterUI : MonoBehaviour
 
     private List<GameObject> containers = new List<GameObject>();
 
+    [Header("Container Control")]
     public float containerRadius;
     public float containerSpreadOffset;
     public float containerSpacing;
+
+    [Header("Reaction Control")]
+    public float reactionLength;
+    private float maxReactionLength;
+    private bool react;
 
     private float maxHealth;
     private int maxHealthContainers;
     private int currentHealthContainers;
     private status playerStatus;
+
+    private Vector3 origin;
 
     void Start()
     {
@@ -28,6 +37,9 @@ public class healthMeterUI : MonoBehaviour
         maxHealthContainers = playerStatus.maxHealthContainers;
         currentHealthContainers = playerStatus.currentHealthContainers;
         createHealthContainers(currentHealthContainers);
+        maxReactionLength = reactionLength;
+
+        origin = transform.position;
     }
 
     void createHealthContainers(int count)
@@ -63,6 +75,30 @@ public class healthMeterUI : MonoBehaviour
         healthMeter.fillAmount = currentHealth;
         healthMeterText.text = currentHealth.ToString("0.0");
         healthMeterBg.fillAmount = currentHealth;
+
+        if (player.Instance.knockback)
+        {
+            react = true;
+        }
+
+        if(react)
+        {
+            changeReact();
+        }
+    }
+
+    void changeReact()
+    {
+        Vector2 ranCir = Random.insideUnitCircle * 4;
+        Vector2 ranPos = new Vector2(origin.x, origin.y) + ranCir;
+        transform.position = ranPos;
+        reactionLength -= Time.deltaTime;
+        if(reactionLength <= 0)
+        {
+            reactionLength = maxReactionLength;
+            transform.position = origin;
+            react = false;
+        }
     }
 
     void checkHealthContainers(int count)
