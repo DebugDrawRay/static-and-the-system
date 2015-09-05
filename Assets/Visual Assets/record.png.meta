@@ -1,17 +1,14 @@
 fileFormatVersion: 2
-guid: de3b3256e05a67f4988c7b0c82a584be
-timeCreated: 1441435087
+guid: 074a6b40f5765a4428c058bc00ebb5fa
+timeCreated: 1441415448
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
-    21300000: player_l_0
-    21300002: player_l_1
-    21300004: player_l_2
-    21300006: player_l_3
-    21300008: player_l_4
-    21300010: player_l_5
-    21300012: player_l_6
-    21300014: player_l_7
+    21300000: record_0
+    21300002: record_1
+    21300004: record_2
+    21300006: record_3
+    21300008: record_4
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -57,85 +54,55 @@ TextureImporter:
   buildTargetSettings: []
   spriteSheet:
     sprites:
-    - name: player_l_0
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 21
-        width: 14
-        height: 21
-      alignment: 0
-      pivot: {x: .5, y: .5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-    - name: player_l_1
-      rect:
-        serializedVersion: 2
-        x: 14
-        y: 21
-        width: 14
-        height: 21
-      alignment: 0
-      pivot: {x: .5, y: .5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-    - name: player_l_2
+    - name: record_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 14
-        height: 21
+        width: 25
+        height: 25
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: player_l_3
+    - name: record_1
       rect:
         serializedVersion: 2
-        x: 14
+        x: 25
         y: 0
-        width: 14
-        height: 21
+        width: 25
+        height: 25
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: player_l_4
+    - name: record_2
       rect:
         serializedVersion: 2
-        x: 28
+        x: 50
         y: 0
-        width: 14
-        height: 21
+        width: 25
+        height: 25
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: player_l_5
+    - name: record_3
       rect:
         serializedVersion: 2
-        x: 42
+        x: 75
         y: 0
-        width: 14
-        height: 21
+        width: 25
+        height: 25
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: player_l_6
+    - name: record_4
       rect:
         serializedVersion: 2
-        x: 56
+        x: 100
         y: 0
-        width: 14
-        height: 21
+        width: 25
+        height: 25
       alignment: 0
-      pivot: {x: .5, y: .5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-    - name: player_l_7
-      rect:
-        serializedVersion: 2
-        x: 70
-        y: 0
-        width: 14
-        height: 21
-      alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
   spritePackingTag: 
   userData: 

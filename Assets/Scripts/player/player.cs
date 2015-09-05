@@ -27,6 +27,8 @@ public class player : MonoBehaviour
     public float jumpHold;
     public float jumpHoldMax;
 
+    public AudioClip jumpSound;
+
     [Header("Weapons Control")]
     public GameObject proj;
     public float projOffsetX;
@@ -59,14 +61,15 @@ public class player : MonoBehaviour
     private float currentKnockbackLength;
     public Color damageColor;
 
-    [Header("Animation Arrays")]
-    public AnimationClip[] idleAnimations;
+    [Header("External Animations")]
+    public GameObject recordAnim;
     
     //components
     private Rigidbody2D rigid;
     private SpriteRenderer currentSprite;
     private Animator anim;
     private status currentStatus;
+    private AudioSource audio;
 
     //inputs - get definitions within inputs.cs
     private float hor;
@@ -87,6 +90,7 @@ public class player : MonoBehaviour
         currentSprite = GetComponent<SpriteRenderer>();
         currentStatus = GetComponent<status>();
         anim = GetComponent<Animator>();
+        audio = GetComponent<AudioSource>();
     }
 
     void initializeClasses()
@@ -229,18 +233,25 @@ public class player : MonoBehaviour
     {
         if(jump)
         {
+
             if (jumpHold < jumpHoldMax)
             {
                 if (jumpInput)
                 {
+                    if (Input.GetButtonDown(Inputs.jump) && (checkGrounded() || checkWallCling()))
+                    {
+                        AudioSource.PlayClipAtPoint(jumpSound, transform.position);
+                    }
                     Vector2 force = Vector2.up * jumpVel;
                     force.x = rigid.velocity.x;
                     jumpAction(force);
+                    
                 }
                 else if (wallJumpInput && hor != 0)
                 {
                     Vector2 jumpVect = (Vector2.up + (-Vector2.right * lastDir)) * jumpVel;
                     jumpAction(jumpVect/wallJumpVelMod);
+                    
                 }
             }
         }
@@ -288,6 +299,7 @@ public class player : MonoBehaviour
 
     void recordObject(GameObject target)
     {
+        recordAnimation(target);
         target.GetComponent<objectData>().labelActive(false);
         recordedObject = target;
         recordedObject.SetActive(false);
@@ -297,7 +309,14 @@ public class player : MonoBehaviour
     {
         target.SetActive(true);
         target.transform.position = transform.position + (Vector3.right * lastDir);
+        recordAnimation(target);
         recordedObject = null;
+    }
+
+    void recordAnimation(GameObject target)
+    {
+        Vector2 origin = target.transform.position;
+        Instantiate(recordAnim, origin, Quaternion.identity);
     }
 
     //bang bangs
@@ -479,13 +498,21 @@ public class player : MonoBehaviour
     void animStateMachine()
     {
         anim.SetFloat("Direction", lastDir);
-        if (hor != 0)
+        if (checkGrounded())
         {
-            anim.SetBool("isMoving", true);
+            anim.SetBool("isGrounded", true);
+            if (hor != 0)
+            {
+                anim.SetBool("isMoving", true);
+            }
+            else
+            {
+                anim.SetBool("isMoving", false);
+            }
         }
         else
         {
-            anim.SetBool("isMoving", false);
+            anim.SetBool("isGrounded", false);
         }
     }
 }

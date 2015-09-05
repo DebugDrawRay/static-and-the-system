@@ -18,13 +18,9 @@ public class flyer : MonoBehaviour
         _player = player.Instance.gameObject;
     }
 
-    void Awake()
-    {
-        initializeComponents();
-    }
-
     void Start()
     {
+        initializeComponents();
     }
 
     void Update()
