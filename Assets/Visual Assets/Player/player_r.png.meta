@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: 1b29224b445096244b3736f38df412d6
-timeCreated: 1441435356
+timeCreated: 1441485650
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -60,7 +60,7 @@ TextureImporter:
     - name: player_r_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 14
         y: 21
         width: 14
         height: 21
@@ -70,7 +70,7 @@ TextureImporter:
     - name: player_r_1
       rect:
         serializedVersion: 2
-        x: 14
+        x: 42
         y: 21
         width: 14
         height: 21
@@ -80,7 +80,7 @@ TextureImporter:
     - name: player_r_2
       rect:
         serializedVersion: 2
-        x: 0
+        x: 140
         y: 0
         width: 14
         height: 21
@@ -90,7 +90,7 @@ TextureImporter:
     - name: player_r_3
       rect:
         serializedVersion: 2
-        x: 14
+        x: 112
         y: 0
         width: 14
         height: 21
@@ -100,7 +100,7 @@ TextureImporter:
     - name: player_r_4
       rect:
         serializedVersion: 2
-        x: 28
+        x: 84
         y: 0
         width: 14
         height: 21
@@ -110,7 +110,7 @@ TextureImporter:
     - name: player_r_5
       rect:
         serializedVersion: 2
-        x: 42
+        x: 56
         y: 0
         width: 14
         height: 21
@@ -120,7 +120,7 @@ TextureImporter:
     - name: player_r_6
       rect:
         serializedVersion: 2
-        x: 56
+        x: 28
         y: 0
         width: 14
         height: 21
@@ -130,7 +130,7 @@ TextureImporter:
     - name: player_r_7
       rect:
         serializedVersion: 2
-        x: 70
+        x: 0
         y: 0
         width: 14
         height: 21

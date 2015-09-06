@@ -27,6 +27,7 @@ public class player : MonoBehaviour
     public float jumpHold;
     public float jumpHoldMax;
 
+    private float wallJumpDir;
     public AudioClip jumpSound;
 
     [Header("Weapons Control")]
@@ -138,13 +139,11 @@ public class player : MonoBehaviour
         runListeners();
         stateMachine();
         animStateMachine();
-        Debug.Log(rigid.velocity);
     }
 
     void runListeners()
     {
         inputListener();
-        jumpListener();
     }
 
     //inputs
@@ -221,17 +220,45 @@ public class player : MonoBehaviour
     //jumping
     void jumpController()
     {
-        jumpInput = true;
-        wallJumpInput = false;
+        if (jump)
+        {
+            jumpInput = true;
+            if (jumpHold < jumpHoldMax)
+            {
+                if (Input.GetButtonDown(Inputs.jump) && (checkGrounded() || checkWallCling()))
+                {
+                    AudioSource.PlayClipAtPoint(jumpSound, transform.position);
+                }
+                Vector2 force = Vector2.up * jumpVel;
+                force.x = rigid.velocity.x;
+                jumpAction(force);
+            }
+        }
+        if(jumpInput)
+        {
+            if(!jump)
+            {
+                jumpHold = jumpHoldMax;
+                jumpInput = false;
+            }
+        }
     }
     void wallJumpController()
     {
-        wallJumpInput = true;
-        jumpInput = false;
+        if (jump)
+        {
+            if (wallJumpInput && hor != 0)
+            {
+                Vector2 jumpVect = (Vector2.up + (-Vector2.right * wallJumpDir)) * jumpVel;
+                jumpAction(jumpVect / wallJumpVelMod);
+                wallJumpInput = false;
+            }
+        }
     }
-    void jumpListener()
+
+    /*void jumpListener()
     {
-        if(jump)
+        if (jump)
         {
 
             if (jumpHold < jumpHoldMax)
@@ -245,13 +272,13 @@ public class player : MonoBehaviour
                     Vector2 force = Vector2.up * jumpVel;
                     force.x = rigid.velocity.x;
                     jumpAction(force);
-                    
+
                 }
                 else if (wallJumpInput && hor != 0)
                 {
                     Vector2 jumpVect = (Vector2.up + (-Vector2.right * lastDir)) * jumpVel;
-                    jumpAction(jumpVect/wallJumpVelMod);
-                    
+                    jumpAction(jumpVect / wallJumpVelMod);
+
                 }
             }
         }
@@ -260,7 +287,7 @@ public class player : MonoBehaviour
             jumpInput = false;
             wallJumpInput = false;
         }
-    }
+    }*/
     void jumpAction(Vector2 jumpVector)
     {
         rigid.velocity = jumpVector;
@@ -343,7 +370,7 @@ public class player : MonoBehaviour
     }
     bool checkGrounded()
     {
-        Vector2 pos = new Vector2(transform.position.x, transform.position.y);
+        Vector2 pos = GetComponent<Collider2D>().bounds.center;
         Vector2 dir = -Vector2.up;
         Vector2 size = GetComponent<Collider2D>().bounds.size;
         RaycastHit2D checkHit = Physics2D.BoxCast(pos, size, 0, dir, jumpCheckBuffer, jumpableLayers);
@@ -364,27 +391,67 @@ public class player : MonoBehaviour
 
     bool checkWallCling()
     {
-        Vector2 pos = new Vector2(transform.position.x, transform.position.y);
+        Vector2 pos = GetComponent<Collider2D>().bounds.center;
         Vector2 lDir = -Vector2.right;
         Vector2 rDir = Vector2.right;
         Vector2 size = GetComponent<Collider2D>().bounds.size;
         size.y = size.y / wallJumpCheckMod;
-        Debug.Log(size);
         RaycastHit2D checkHitL = Physics2D.BoxCast(pos, size, 0, lDir, jumpCheckBuffer, jumpableLayers);
         RaycastHit2D checkHitR = Physics2D.BoxCast(pos, size, 0, rDir, jumpCheckBuffer, jumpableLayers);
-        if ((checkHitL && checkHitL.collider != null) || (checkHitR && checkHitR.collider != null))
+        if (hor != 0)
         {
-            Debug.Log("walled");
+            if (checkHitL && checkHitL.collider != null)
+            {
+                if (!jump)
+                {
+                    wallJumpInput = true;
+                }
+                wallJumpDir = -1;
+                return true;
+            }
+            else if (checkHitR && checkHitR.collider != null)
+            {
+                if (!jump)
+                {
+                    wallJumpInput = true;
+                }
+                wallJumpDir = 1;
+                return true;
+            }
+            else
+            {
+                if (!jump)
+                {
+                    wallJumpInput = false;
+                }
+                return false;
+            }
+        }
+        else
+        {
             if (!jump)
             {
-                jumpHold = 0;
+                wallJumpInput = false;
+            }
+            return false;
+        }
+        /*        if (((checkHitL && checkHitL.collider != null) || (checkHitR && checkHitR.collider != null)))
+        {
+            if (!jump)
+            {
+                wallJumpInput = true;
             }
             return true;
         }
         else
         {
+            if (!jump)
+            {
+                wallJumpInput = false;
+            }
             return false;
-        }
+        }*/
+
     }
 
     void knockbackController()
@@ -442,7 +509,7 @@ public class player : MonoBehaviour
     }
     void wallJumpState()
     {
-
+        wallJumpController();
     }
     void dashState()
     {
@@ -475,9 +542,18 @@ public class player : MonoBehaviour
         }
         else if (checkWallCling())
         {
+            Debug.Log("Is clinged");
             activeState = wallClingState;
+            if(jump)
+            {
+                activeState = wallJumpState;
+            }
         }
-        else
+        else if (inDash)
+        {
+            activeState = dashState;
+        }
+        /* else
         {
             if (inDash)
             {
@@ -487,9 +563,9 @@ public class player : MonoBehaviour
             {
                 activeState = jumpedState;
             }
-        }
+        }*/
 
-        if(activeState != null)
+        if (activeState != null)
         {
             activeState();
         }
