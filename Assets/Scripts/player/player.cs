@@ -22,10 +22,12 @@ public class player : MonoBehaviour
 
     [Header("Jump Control")]
     public float jumpVel;
+    public AnimationCurve jumpCurve;
     public float wallJumpVelMod;
-    private bool jumpPlay;
+
     public float jumpHold;
     public float jumpHoldMax;
+    
 
     private float wallJumpDir;
     public AudioClip jumpSound;
@@ -37,6 +39,7 @@ public class player : MonoBehaviour
 
     [Header("Collision Control")]
     public LayerMask jumpableLayers;
+    public LayerMask wallJumpableLayers;
     public float jumpCheckBuffer;
     public float wallJumpCheckMod;
     public string[] damageSourceTags;
@@ -249,6 +252,10 @@ public class player : MonoBehaviour
         {
             if (wallJumpInput && hor != 0)
             {
+                if (Input.GetButtonDown(Inputs.jump) && (checkGrounded() || checkWallCling()))
+                {
+                    AudioSource.PlayClipAtPoint(jumpSound, transform.position);
+                }
                 Vector2 jumpVect = (Vector2.up + (-Vector2.right * wallJumpDir)) * jumpVel;
                 jumpAction(jumpVect / wallJumpVelMod);
                 wallJumpInput = false;
@@ -256,41 +263,11 @@ public class player : MonoBehaviour
         }
     }
 
-    /*void jumpListener()
-    {
-        if (jump)
-        {
-
-            if (jumpHold < jumpHoldMax)
-            {
-                if (jumpInput)
-                {
-                    if (Input.GetButtonDown(Inputs.jump) && (checkGrounded() || checkWallCling()))
-                    {
-                        AudioSource.PlayClipAtPoint(jumpSound, transform.position);
-                    }
-                    Vector2 force = Vector2.up * jumpVel;
-                    force.x = rigid.velocity.x;
-                    jumpAction(force);
-
-                }
-                else if (wallJumpInput && hor != 0)
-                {
-                    Vector2 jumpVect = (Vector2.up + (-Vector2.right * lastDir)) * jumpVel;
-                    jumpAction(jumpVect / wallJumpVelMod);
-
-                }
-            }
-        }
-        else
-        {
-            jumpInput = false;
-            wallJumpInput = false;
-        }
-    }*/
     void jumpAction(Vector2 jumpVector)
     {
-        rigid.velocity = jumpVector;
+        float height = jumpCurve.Evaluate(jumpHold / jumpHoldMax);
+        Vector2 calcVel = new Vector2(jumpVector.x, jumpVector.y * height);
+        rigid.velocity = calcVel;
     }
 
     //Scanning and recording interactions
@@ -396,8 +373,8 @@ public class player : MonoBehaviour
         Vector2 rDir = Vector2.right;
         Vector2 size = GetComponent<Collider2D>().bounds.size;
         size.y = size.y / wallJumpCheckMod;
-        RaycastHit2D checkHitL = Physics2D.BoxCast(pos, size, 0, lDir, jumpCheckBuffer, jumpableLayers);
-        RaycastHit2D checkHitR = Physics2D.BoxCast(pos, size, 0, rDir, jumpCheckBuffer, jumpableLayers);
+        RaycastHit2D checkHitL = Physics2D.BoxCast(pos, size, 0, lDir, jumpCheckBuffer, wallJumpableLayers);
+        RaycastHit2D checkHitR = Physics2D.BoxCast(pos, size, 0, rDir, jumpCheckBuffer, wallJumpableLayers);
         if (hor != 0)
         {
             if (checkHitL && checkHitL.collider != null)
@@ -435,23 +412,6 @@ public class player : MonoBehaviour
             }
             return false;
         }
-        /*        if (((checkHitL && checkHitL.collider != null) || (checkHitR && checkHitR.collider != null)))
-        {
-            if (!jump)
-            {
-                wallJumpInput = true;
-            }
-            return true;
-        }
-        else
-        {
-            if (!jump)
-            {
-                wallJumpInput = false;
-            }
-            return false;
-        }*/
-
     }
 
     void knockbackController()
@@ -574,6 +534,7 @@ public class player : MonoBehaviour
     void animStateMachine()
     {
         anim.SetFloat("Direction", lastDir);
+        anim.SetBool("isShooting", fireWeapon);
         if (checkGrounded())
         {
             anim.SetBool("isGrounded", true);
