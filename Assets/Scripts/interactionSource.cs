@@ -7,6 +7,7 @@ public class interactionSource : MonoBehaviour
     public float damage;
     public bool isInvul;
     public float lifeTime;
+    public GameObject deathReact;
 
     void Update()
     { 
@@ -53,6 +54,7 @@ public class interactionSource : MonoBehaviour
         }
         if (!isInvul)
         {
+            Instantiate(deathReact, transform.position, Quaternion.identity);
             Destroy(this.gameObject);
         }
     }

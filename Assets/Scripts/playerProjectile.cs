@@ -9,6 +9,10 @@ public class playerProjectile : MonoBehaviour
 
     void Start()
     {
+        if(facing < 0)
+        {
+            transform.eulerAngles = new Vector3(0, 0, 180);
+        }
         GetComponent<Rigidbody2D>().velocity = speed * (Vector2.right * facing);
     }
     void OnTriggerEnter2D (Collider2D hit)
