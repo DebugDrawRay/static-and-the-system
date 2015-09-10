@@ -19,6 +19,28 @@ public class enemy : MonoBehaviour
     public int dropMaxAmount;
     public GameObject[] pickupDrops;
 
+    [Header("Reactions")]
+    public Color damageColor;
+    public float reactLength;
+    private float maxReactLength;
+    public AudioClip damageSound;
+    private bool damageHit;
+    //Components
+    private SpriteRenderer sprite;
+
+    void Start()
+    {
+        maxReactLength = reactLength;
+        sprite = GetComponent<SpriteRenderer>();
+    }
+
+    void Update()
+    {
+        if(damageHit)
+        {
+            hitReact();
+        }
+    }
     void OnTriggerEnter2D(Collider2D hit)
     {
         if(contactDamage)
@@ -27,10 +49,7 @@ public class enemy : MonoBehaviour
             {
                 if(hit.gameObject.tag == tag)
                 {
-                    if (hit.GetComponent<status>())
-                    {
-                        hit.GetComponent<status>().changeStatus(baseDamage);
-                    }
+                    damageHit = true;
                 }
             }
         }
@@ -54,5 +73,22 @@ public class enemy : MonoBehaviour
                 }
             }
         }
+    }
+
+    void hitReact()
+    {
+        if(reactLength == maxReactLength)
+        {
+            AudioSource.PlayClipAtPoint(damageSound, transform.position);
+        }
+        sprite.color = damageColor;
+        reactLength -= Time.deltaTime;
+        if(reactLength <= 0)
+        {
+            sprite.color = Color.white;
+            reactLength = maxReactLength;
+            damageHit = false;
+        }
+
     }
 }

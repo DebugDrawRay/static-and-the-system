@@ -16,10 +16,7 @@ public class player : MonoBehaviour
     public float dashLength;
     private float currentDashLength;
     private bool inDash;
-
-    [Header("Movement Animations")]
-    public GameObject dashCloud;
-
+    public AudioClip dashSound;
     [Header("Jump Control")]
     public float jumpVel;
     public AnimationCurve jumpCurve;
@@ -67,7 +64,8 @@ public class player : MonoBehaviour
 
     [Header("External Animations")]
     public GameObject recordAnim;
-    
+    public GameObject dashCloud;
+
     //components
     private Rigidbody2D rigid;
     private SpriteRenderer currentSprite;
@@ -202,6 +200,7 @@ public class player : MonoBehaviour
         {
             if (!inDash)
             {
+                //AudioSource.PlayClipAtPoint(dashSound, transform.position);
                 Vector2 newDir = new Vector2(dir.x, dir.y);
                 Vector2 addDash = newDir * dashForce;
                 rigid.AddForce(addDash);
@@ -481,7 +480,6 @@ public class player : MonoBehaviour
         knockbackController();
     }
 
-    //animation controllers
     //state control
     void stateMachine()
     {
