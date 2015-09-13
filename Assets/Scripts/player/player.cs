@@ -17,6 +17,7 @@ public class player : MonoBehaviour
     private float currentDashLength;
     private bool inDash;
     public AudioClip dashSound;
+
     [Header("Jump Control")]
     public float jumpVel;
     public AnimationCurve jumpCurve;
@@ -24,7 +25,8 @@ public class player : MonoBehaviour
 
     public float jumpHold;
     public float jumpHoldMax;
-    
+
+    public float negativeGrav;
 
     private float wallJumpDir;
     public AudioClip jumpSound;
@@ -55,6 +57,10 @@ public class player : MonoBehaviour
 
     public GameObject recordedObject;
     public GameObject recordableObject;
+    private bool recordHold;
+
+    public Sprite canRecord;
+    public Sprite canNotRecord;
 
     [Header("Damage Source Reaction")]
     public float knockbackForce;
@@ -81,7 +87,8 @@ public class player : MonoBehaviour
     private bool wallJumpInput;
     private bool fireWeapon;
     private bool scan;
-    private bool record;
+    private bool recordDown;
+    private bool recordUp;
     private bool dash;
     //virtual inputs
     public bool knockback;
@@ -154,12 +161,14 @@ public class player : MonoBehaviour
         jump = Input.GetButton(Inputs.jump);
         fireWeapon = Input.GetButtonDown(Inputs.fire);
         scan = Input.GetButtonDown(Inputs.scan);
-        record = Input.GetButtonDown(Inputs.record);
+        recordDown = Input.GetButton(Inputs.record);
         dash = Input.GetButtonDown(Inputs.dash);
         
         //get the last pressed direction
         getLastDir(hor);
 
+        //get record hol
+        recordUp = Input.GetButtonUp(Inputs.record);
         //get length of press
         jumpHold += getHoldLength(jump);
     }
@@ -284,7 +293,23 @@ public class player : MonoBehaviour
     void recordController()
     {
         recorderObject obj = recorder.GetComponent<recorderObject>();
-        if (record)
+        if (recordDown)
+        {
+            recordHold = true;
+            if (recordedObject != null)
+            {
+                previewObject(recordedObject);
+            }
+            if(recordedObject == null && recordableObject != null)
+            {
+                recorder.GetComponent<SpriteRenderer>().sprite = canRecord;
+            }
+            if (recordedObject == null && recordableObject == null)
+            {
+                recorder.GetComponent<SpriteRenderer>().sprite = canNotRecord;
+            }
+        }
+        if (recordHold && recordUp)
         {
             if (recordedObject == null && recordableObject != null)
             {
@@ -294,6 +319,9 @@ public class player : MonoBehaviour
             {
                 replayObject(recordedObject);
             }
+            recorder.GetComponent<SpriteRenderer>().sprite = null;
+            recordHold = false;
+
         }
         Vector2 origin = new Vector2(transform.position.x, transform.position.y);
         Vector2 anchor = origin + (recordRelPos * lastDir);
@@ -308,8 +336,24 @@ public class player : MonoBehaviour
         recordedObject.SetActive(false);
     }
 
+    void previewObject(GameObject target)
+    {
+        target.SetActive(true);
+        foreach (Collider2D col in target.GetComponents<Collider2D>())
+        {
+            col.enabled = false;
+        }
+        target.GetComponent<SpriteRenderer>().color = new Color(255, 255, 255, 0.5f);
+        target.transform.position = transform.position + (Vector3.right * lastDir);
+    }
+
     void replayObject(GameObject target)
     {
+        foreach (Collider2D col in target.GetComponents<Collider2D>())
+        {
+            col.enabled = true;
+        }
+        target.GetComponent<SpriteRenderer>().color = new Color(255, 255, 255, 1);
         target.SetActive(true);
         target.transform.position = transform.position + (Vector3.right * lastDir);
         recordAnimation(target);
@@ -415,18 +459,24 @@ public class player : MonoBehaviour
 
     void knockbackController()
     {
-        currentSprite.color = damageColor;
-        Vector2 newDir = new Vector2(knockbackDir.x, knockbackDir.y);
-        Vector2 knock = newDir * knockbackForce;
-        rigid.AddForce(-knock);
-        //Vector2 randomPosition = Random.insideUnitCircle + new Vector2(transform.position.x, transform.position.y);
-        //transform.position = new Vector3(randomPosition.x, randomPosition.y, transform.position.z);
-        currentKnockbackLength -= Time.deltaTime;
-        if (currentKnockbackLength <= 0)
+        if (currentKnockbackLength > 0)
         {
-            currentKnockbackLength = knockbackLength;
-            knockback = false;
+            currentSprite.color = damageColor;
+            Vector2 newDir = new Vector2(knockbackDir.x, 0);
+            newDir.x = Mathf.Round(newDir.normalized.x);
+            Vector2 knock = (newDir - Vector2.up) * knockbackForce;
+            Debug.Log(knock);
+            rigid.AddForce(-knock);
+            currentKnockbackLength -= Time.deltaTime;
+        }
+        else if(currentKnockbackLength <= 0)
+        {
             currentSprite.color = Color.white;
+            if(checkGrounded())
+            {
+                currentKnockbackLength = knockbackLength;
+                knockback = false;
+            }
         }
     }
 
@@ -444,6 +494,7 @@ public class player : MonoBehaviour
     }
 
     //states
+    
     void groundedState()
     {
         weaponController();
@@ -453,12 +504,22 @@ public class player : MonoBehaviour
         scanController();
         recordController();
     }
+    void inAirState()
+    {
+        movementController();
+        weaponController();
+        movementController();
+        jumpController();
+        scanController();
+        recordController();
+    }
     void jumpedState()
     {
         weaponController();
         movementController();
         dashController(Vector2.right * lastDir);//THIS IS FUCKING DUMB WRITE A FUNCTION/NEW VAR ASSHOLE
         scanController();
+        recordController();
     }
     void wallClingState()
     {
@@ -511,17 +572,6 @@ public class player : MonoBehaviour
         {
             activeState = dashState;
         }
-        /* else
-        {
-            if (inDash)
-            {
-                activeState = dashState;
-            }
-            else
-            {
-                activeState = jumpedState;
-            }
-        }*/
 
         if (activeState != null)
         {
@@ -533,21 +583,14 @@ public class player : MonoBehaviour
     {
         anim.SetFloat("Direction", lastDir);
         anim.SetBool("isShooting", fireWeapon);
-        if (checkGrounded())
+        anim.SetBool("isGrounded", checkGrounded());
+        if (hor != 0)
         {
-            anim.SetBool("isGrounded", true);
-            if (hor != 0)
-            {
-                anim.SetBool("isMoving", true);
-            }
-            else
-            {
-                anim.SetBool("isMoving", false);
-            }
+            anim.SetBool("isMoving", true);
         }
         else
         {
-            anim.SetBool("isGrounded", false);
+            anim.SetBool("isMoving", false);
         }
     }
 }
