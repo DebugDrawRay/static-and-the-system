@@ -20,7 +20,7 @@ public class platformPatroller : MonoBehaviour
     private Rigidbody2D rigid;
     private SpriteRenderer sprite;
 
-    private const float EDGE_CHECK_BUFFER = 1;
+    private const float EDGE_CHECK_BUFFER = 0.5f;
 
     void initializeComponents()
     {
@@ -54,12 +54,17 @@ public class platformPatroller : MonoBehaviour
             hor = 1;
         }
 
-        Vector2 forward = Vector2.right;//new Vector2(transform.right.x, transform.right.y);
-        Vector2 origin = new Vector2(transform.position.x, transform.position.y) + (forward * hor);
-        Vector2 direction = new Vector2(-Vector3.up.x, -Vector3.up.y);
-        Ray2D check = new Ray2D(origin, direction);
-        RaycastHit2D checkHit = Physics2D.Raycast(check.origin, check.direction, EDGE_CHECK_BUFFER, properties.ground);
-        if (checkHit.collider == null)
+        Vector2 dir = Vector2.right / 2;
+
+        Vector2 origin = new Vector2(transform.position.x, transform.position.y) + (dir * hor);
+        Ray2D checkDown = new Ray2D(origin, -Vector2.up);
+
+        RaycastHit2D checkHitDown = Physics2D.Raycast(checkDown.origin, checkDown.direction, EDGE_CHECK_BUFFER, properties.ground);
+
+        Ray2D checkForward = new Ray2D(transform.position, dir * hor);
+        RaycastHit2D checkHitForward = Physics2D.Raycast(checkForward.origin, checkForward.direction, EDGE_CHECK_BUFFER, properties.ground);
+
+        if (checkHitDown.collider == null || checkHitForward.collider != null)
         {
             hor = hor * -1;
         }

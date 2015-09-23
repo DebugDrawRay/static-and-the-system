@@ -427,7 +427,7 @@ public class player : MonoBehaviour
                 if (!jump)
                 {
                     wallJumpInput = true;
-                    wallJumpDir = lastDir;
+                    wallJumpDir = hor;
                     return true;
                 }
                 else
@@ -440,7 +440,7 @@ public class player : MonoBehaviour
                 if (!jump)
                 {
                     wallJumpInput = true;
-                    wallJumpDir = lastDir;
+                    wallJumpDir = hor;
                     return true;
                 }
                 else
