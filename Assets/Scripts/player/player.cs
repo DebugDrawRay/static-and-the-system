@@ -83,6 +83,7 @@ public class player : MonoBehaviour
     private float hor;
     private float lastDir;
     private bool jump;
+    private bool jumpOnce;
     private bool jumpInput;
     private bool wallJumpInput;
     private bool fireWeapon;
@@ -159,6 +160,7 @@ public class player : MonoBehaviour
     {
         hor = Input.GetAxisRaw(Inputs.horAxis);
         jump = Input.GetButton(Inputs.jump);
+        jumpOnce = Input.GetButtonDown(Inputs.jump);
         fireWeapon = Input.GetButtonDown(Inputs.fire);
         scan = Input.GetButtonDown(Inputs.scan);
         recordDown = Input.GetButton(Inputs.record);
@@ -256,9 +258,10 @@ public class player : MonoBehaviour
     }
     void wallJumpController()
     {
+        Debug.Log("In Wall State");
         if (jump)
         {
-            if (wallJumpInput && hor != 0)
+            if (wallJumpInput)
             {
                 if (Input.GetButtonDown(Inputs.jump) && (checkGrounded() || checkWallCling()))
                 {
@@ -425,34 +428,37 @@ public class player : MonoBehaviour
                 if (!jump)
                 {
                     wallJumpInput = true;
+                    wallJumpDir = -1;
+                    return true;
                 }
-                wallJumpDir = -1;
-                return true;
+                else
+                {
+                    return false;
+                }
             }
             else if (checkHitR && checkHitR.collider != null)
             {
                 if (!jump)
                 {
                     wallJumpInput = true;
+                    wallJumpDir = 1;
+                    return true;
                 }
-                wallJumpDir = 1;
-                return true;
+                else
+                {
+                    return false;
+                }
             }
             else
             {
-                if (!jump)
-                {
-                    wallJumpInput = false;
-                }
+        
+                wallJumpInput = false;
                 return false;
             }
         }
         else
         {
-            if (!jump)
-            {
-                wallJumpInput = false;
-            }
+            wallJumpInput = false;
             return false;
         }
     }
@@ -504,15 +510,6 @@ public class player : MonoBehaviour
         scanController();
         recordController();
     }
-    void inAirState()
-    {
-        movementController();
-        weaponController();
-        movementController();
-        jumpController();
-        scanController();
-        recordController();
-    }
     void jumpedState()
     {
         weaponController();
@@ -529,6 +526,7 @@ public class player : MonoBehaviour
     }
     void wallJumpState()
     {
+        Debug.Log("Wall Jump");
         wallJumpController();
     }
     void dashState()
@@ -561,12 +559,11 @@ public class player : MonoBehaviour
         }
         else if (checkWallCling())
         {
-            Debug.Log("Is clinged");
             activeState = wallClingState;
-            if(jump)
-            {
-                activeState = wallJumpState;
-            }
+        }
+        else if(activeState == wallClingState && jumpOnce)
+        {
+            activeState = wallJumpState;
         }
         else if (inDash)
         {
