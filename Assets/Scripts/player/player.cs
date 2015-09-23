@@ -205,14 +205,14 @@ public class player : MonoBehaviour
             rigid.velocity = vel;
     }
 
-    void dashController(Vector3 dir)
+    void dashController()
     {
         if (dash)
         {
             if (!inDash)
             {
                 //AudioSource.PlayClipAtPoint(dashSound, transform.position);
-                Vector2 newDir = new Vector2(dir.x, dir.y);
+                Vector2 newDir = Vector2.right * lastDir;
                 Vector2 addDash = newDir * dashForce;
                 rigid.AddForce(addDash);
                 Instantiate(dashCloud, transform.position, Quaternion.identity);
@@ -258,7 +258,6 @@ public class player : MonoBehaviour
     }
     void wallJumpController()
     {
-        Debug.Log("In Wall State");
         if (jump)
         {
             if (wallJumpInput)
@@ -428,7 +427,7 @@ public class player : MonoBehaviour
                 if (!jump)
                 {
                     wallJumpInput = true;
-                    wallJumpDir = -1;
+                    wallJumpDir = lastDir;
                     return true;
                 }
                 else
@@ -441,7 +440,7 @@ public class player : MonoBehaviour
                 if (!jump)
                 {
                     wallJumpInput = true;
-                    wallJumpDir = 1;
+                    wallJumpDir = lastDir;
                     return true;
                 }
                 else
@@ -471,7 +470,6 @@ public class player : MonoBehaviour
             Vector2 newDir = new Vector2(knockbackDir.x, 0);
             newDir.x = Mathf.Round(newDir.normalized.x);
             Vector2 knock = (newDir - Vector2.up) * knockbackForce;
-            Debug.Log(knock);
             rigid.AddForce(-knock);
             currentKnockbackLength -= Time.deltaTime;
         }
@@ -506,37 +504,35 @@ public class player : MonoBehaviour
         weaponController();
         movementController();
         jumpController();
-        dashController(Vector2.right * lastDir);
-        scanController();
-        recordController();
+        dashController();
     }
     void jumpedState()
     {
         weaponController();
         movementController();
-        dashController(Vector2.right * lastDir);//THIS IS FUCKING DUMB WRITE A FUNCTION/NEW VAR ASSHOLE
-        scanController();
-        recordController();
+        dashController();
     }
     void wallClingState()
     {
         wallJumpController();
         movementController();
-        scanController();
     }
     void wallJumpState()
     {
-        Debug.Log("Wall Jump");
         wallJumpController();
     }
     void dashState()
     {
-        dashController(Vector2.right * lastDir);
-        scanController();
+        dashController();
     }
     void knockbackState()
     {
         knockbackController();
+    }
+    void scanState()
+    {
+        scanController();
+        recordController();
     }
 
     //state control
@@ -574,6 +570,12 @@ public class player : MonoBehaviour
         {
             activeState();
         }
+        constantStates();
+    }
+
+    void constantStates()
+    {
+        scanState();
     }
 
     void animStateMachine()

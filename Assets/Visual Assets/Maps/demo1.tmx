@@ -8,34 +8,22 @@
    </objectgroup>
   </tile>
   <tile id="21">
-   <objectgroup draworder="index">
-    <object id="0" x="0" y="10.0625" width="24.9375" height="5"/>
-   </objectgroup>
+   <objectgroup draworder="index"/>
   </tile>
   <tile id="22">
-   <objectgroup draworder="index">
-    <object id="0" x="0.03125" y="9.9375" width="24.9375" height="5"/>
-   </objectgroup>
+   <objectgroup draworder="index"/>
   </tile>
   <tile id="23">
-   <objectgroup draworder="index">
-    <object id="0" x="0.09375" y="9.9375" width="24.9375" height="5"/>
-   </objectgroup>
+   <objectgroup draworder="index"/>
   </tile>
   <tile id="30">
-   <objectgroup draworder="index">
-    <object id="0" x="0" y="16" width="25" height="9.00004"/>
-   </objectgroup>
+   <objectgroup draworder="index"/>
   </tile>
   <tile id="31">
-   <objectgroup draworder="index">
-    <object id="0" x="-0.0217391" y="15.9891" width="25" height="9.00004"/>
-   </objectgroup>
+   <objectgroup draworder="index"/>
   </tile>
   <tile id="32">
-   <objectgroup draworder="index">
-    <object id="0" x="-0.0217391" y="15.9348" width="25" height="9.00004"/>
-   </objectgroup>
+   <objectgroup draworder="index"/>
   </tile>
  </tileset>
  <layer name="Background" width="71" height="38">
