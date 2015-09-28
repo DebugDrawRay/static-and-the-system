@@ -9,4 +9,5 @@ public static class Inputs
     public const string scan = "Scan";
     public const string dash = "Dash";
     public const string record = "Record";
+    public const string switchGuns = "Switch Guns";
 }

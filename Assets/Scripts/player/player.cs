@@ -36,6 +36,17 @@ public class player : MonoBehaviour
     public float projOffsetX;
     public float projOffsetY;
 
+    public bool hasBitGun;
+    public bool hasRecordGun;
+
+    public enum guns
+    {
+        bitGun,
+        recordGun
+    }
+
+    public guns currentGun;
+
     [Header("Collision Control")]
     public LayerMask jumpableLayers;
     public LayerMask wallJumpableLayers;
@@ -91,6 +102,7 @@ public class player : MonoBehaviour
     private bool recordDown;
     private bool recordUp;
     private bool dash;
+    private bool switchGuns;
     //virtual inputs
     public bool knockback;
 
@@ -165,7 +177,7 @@ public class player : MonoBehaviour
         scan = Input.GetButtonDown(Inputs.scan);
         recordDown = Input.GetButton(Inputs.record);
         dash = Input.GetButtonDown(Inputs.dash);
-        
+        switchGuns = Input.GetButtonDown(Inputs.switchGuns);
         //get the last pressed direction
         getLastDir(hor);
 
@@ -177,7 +189,7 @@ public class player : MonoBehaviour
 
     float getHoldLength(bool input)
     {
-        if(input)
+        if (input)
         {
             return Time.deltaTime;
         }
@@ -192,6 +204,14 @@ public class player : MonoBehaviour
         if (hor != 0)
         {
             lastDir = input;
+        }
+    }
+    //equipment controller
+    void switchCurrentWeapon()
+    {
+        if(switchGuns)
+        {
+            currentGun = (guns)(int)currentGun + 1;
         }
     }
 
@@ -422,7 +442,7 @@ public class player : MonoBehaviour
         RaycastHit2D checkHitR = Physics2D.BoxCast(pos, size, 0, rDir, jumpCheckBuffer, wallJumpableLayers);
         if (hor != 0)
         {
-            if (checkHitL && checkHitL.collider != null)
+            if (checkHitL && checkHitL.collider != null && hor < 0)
             {
                 if (!jump)
                 {
@@ -435,7 +455,7 @@ public class player : MonoBehaviour
                     return false;
                 }
             }
-            else if (checkHitR && checkHitR.collider != null)
+            else if (checkHitR && checkHitR.collider != null && hor > 0)
             {
                 if (!jump)
                 {
