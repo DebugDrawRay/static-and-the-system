@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 public class player : MonoBehaviour
 {
-
     //state control
     private delegate void stateContainer();
     private stateContainer activeState;
@@ -32,7 +31,9 @@ public class player : MonoBehaviour
     public AudioClip jumpSound;
 
     [Header("Weapons Control")]
-    public GameObject proj;
+    private GameObject proj;
+    public GameObject bitGun;
+    public GameObject recordGun;
     public float projOffsetX;
     public float projOffsetY;
 
@@ -206,13 +207,36 @@ public class player : MonoBehaviour
             lastDir = input;
         }
     }
-    //equipment controller
-    void switchCurrentWeapon()
+    //equipment controllers
+    void switchCurrentGun()
     {
         if(switchGuns)
         {
+            int length = System.Enum.GetNames(typeof(guns)).Length - 1;
             currentGun = (guns)(int)currentGun + 1;
+
+            if ((int)currentGun > length)
+            {
+                currentGun = (guns)0;
+            }
         }
+    }
+
+    void checkEquipedGun()
+    {
+        if(currentGun == guns.bitGun)
+        {
+            proj = bitGun;
+        }
+        else if(currentGun == guns.recordGun)
+        {
+            proj = recordGun;
+        }
+    }
+
+    void checkEquipment()
+    {
+        checkEquipedGun();
     }
 
     //movement 
@@ -399,6 +423,8 @@ public class player : MonoBehaviour
             GameObject newProj = Instantiate(proj, transform.position + pos, Quaternion.identity) as GameObject;
             newProj.GetComponent<playerProjectile>().facing = lastDir;
         }
+        switchCurrentGun();
+        checkEquipedGun();
     }
 
     //collisions
