@@ -4,6 +4,7 @@ using System.Collections;
 public class inputListener : IinputListener
 {
     public float hold;
+    public float lastDirection = 1;
 
     public float horAxis()
     {
@@ -49,5 +50,13 @@ public class inputListener : IinputListener
             hold = 0;
             return hold;
         }
+    }
+    public float lastDir(float axis)
+    {
+        if(axis != 0)
+        {
+            lastDirection = axis;
+        }
+        return lastDirection;
     }
 }

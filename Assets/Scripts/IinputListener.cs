@@ -12,4 +12,5 @@ public interface IinputListener
     bool dash();
     bool switchGuns();
     float inputHold(bool input);
+    float lastDir(float axis);
 }

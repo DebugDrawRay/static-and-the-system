@@ -82,7 +82,8 @@ public class player : MonoBehaviour
     private motor motor;
     private jumpController jumpController;
     private wallJumpController wallJumpController;
-    
+    private gunController gunController;
+
     //inputs - get definitions within inputs.cs
     private IinputListener controllerInput;
 
@@ -112,6 +113,7 @@ public class player : MonoBehaviour
         motor = GetComponent<motor>();
         jumpController = GetComponent<jumpController>();
         wallJumpController = GetComponent<wallJumpController>();
+        gunController = GetComponent<gunController>();
     }
 
     void initializeClasses()
@@ -160,7 +162,7 @@ public class player : MonoBehaviour
     }
 
     //equipment controllers
-    void switchCurrentGun()
+    /*void switchCurrentGun()
     {
         if(switchGuns)
         {
@@ -193,7 +195,7 @@ public class player : MonoBehaviour
 
     //movement 
 
-    /*void dashController()
+    void dashController()
     {
         if (dash)
         {
@@ -307,7 +309,7 @@ public class player : MonoBehaviour
     }
 
     //bang bangs
-    void weaponController()
+    /*void weaponController()
     {
         if (fireWeapon)
         {
@@ -319,7 +321,7 @@ public class player : MonoBehaviour
         }
         switchCurrentGun();
         checkEquipedGun();
-    }
+    }*/
 
     //collisions
     void OnTriggerEnter2D(Collider2D hit)
@@ -471,7 +473,7 @@ public class player : MonoBehaviour
 
     void constantStates()
     {
-
+        runState(gunController);
     }
 
     void animStateMachine()
