@@ -8,27 +8,15 @@ public class player : MonoBehaviour
     private delegate void stateContainer();
     private stateContainer activeState;
 
-    [Header("Movement Control")]
-    public float moveSpeed;
-    public float moveAccel;
-    public float dashForce;
-    public float dashLength;
-    private float currentDashLength;
-    private bool inDash;
-    public AudioClip dashSound;
-
-    [Header("Jump Control")]
-    public float jumpVel;
-    public AnimationCurve jumpCurve;
-    public float wallJumpVelMod;
-
-    public float jumpHold;
-    public float jumpHoldMax;
-
-    public float negativeGrav;
-
-    private float wallJumpDir;
-    public AudioClip jumpSound;
+    private enum state
+    {
+        grounded,
+        jumping,
+        inAir,
+        onWall,
+        offWall
+    }
+    private state currentState;
 
     [Header("Weapons Control")]
     private GameObject proj;
@@ -91,7 +79,13 @@ public class player : MonoBehaviour
     private status currentStatus;
     private AudioSource audio;
 
+    private motor motor;
+    private jumpController jumpController;
+    private wallJumpController wallJumpController;
+    
     //inputs - get definitions within inputs.cs
+    private IinputListener controllerInput;
+
     private float hor;
     private float lastDir;
     private bool jump;
@@ -114,16 +108,19 @@ public class player : MonoBehaviour
         currentStatus = GetComponent<status>();
         anim = GetComponent<Animator>();
         audio = GetComponent<AudioSource>();
+
+        motor = GetComponent<motor>();
+        jumpController = GetComponent<jumpController>();
+        wallJumpController = GetComponent<wallJumpController>();
     }
 
     void initializeClasses()
     {
-
+        controllerInput = new inputListener();
     }
 
     void initializeVars()
     {
-        currentDashLength = dashLength;
         currentKnockbackLength = knockbackLength;
         lastDir = 1;
         scanner = Instantiate(scanObject, transform.position, Quaternion.identity) as GameObject;
@@ -158,55 +155,10 @@ public class player : MonoBehaviour
 
     void Update()
     {
-        runListeners();
         stateMachine();
         animStateMachine();
     }
 
-    void runListeners()
-    {
-        inputListener();
-    }
-
-    //inputs
-    void inputListener()
-    {
-        hor = Input.GetAxisRaw(Inputs.horAxis);
-        jump = Input.GetButton(Inputs.jump);
-        jumpOnce = Input.GetButtonDown(Inputs.jump);
-        fireWeapon = Input.GetButtonDown(Inputs.fire);
-        scan = Input.GetButtonDown(Inputs.scan);
-        recordDown = Input.GetButton(Inputs.record);
-        dash = Input.GetButtonDown(Inputs.dash);
-        switchGuns = Input.GetButtonDown(Inputs.switchGuns);
-        //get the last pressed direction
-        getLastDir(hor);
-
-        //get record hol
-        recordUp = Input.GetButtonUp(Inputs.record);
-        //get length of press
-        jumpHold += getHoldLength(jump);
-    }
-
-    float getHoldLength(bool input)
-    {
-        if (input)
-        {
-            return Time.deltaTime;
-        }
-        else
-        {
-            return 0;
-        }
-    }
-
-    void getLastDir(float input)
-    {
-        if (hor != 0)
-        {
-            lastDir = input;
-        }
-    }
     //equipment controllers
     void switchCurrentGun()
     {
@@ -240,16 +192,8 @@ public class player : MonoBehaviour
     }
 
     //movement 
-    void movementController()
-    {
-            Vector3 startVel = rigid.velocity;
-            Vector3 newVel = (transform.right * hor) * moveSpeed;
-            Vector3 vel = Vector3.Lerp(startVel, newVel, moveAccel);
-            vel.y = rigid.velocity.y;
-            rigid.velocity = vel;
-    }
 
-    void dashController()
+    /*void dashController()
     {
         if (dash)
         {
@@ -272,57 +216,7 @@ public class player : MonoBehaviour
                 currentDashLength = dashLength;
             }
         }
-    }
-
-    //jumping
-    void jumpController()
-    {
-        if (jump)
-        {
-            jumpInput = true;
-            if (jumpHold < jumpHoldMax)
-            {
-                if (Input.GetButtonDown(Inputs.jump) && (checkGrounded() || checkWallCling()))
-                {
-                    AudioSource.PlayClipAtPoint(jumpSound, transform.position);
-                }
-                Vector2 force = Vector2.up * jumpVel;
-                force.x = rigid.velocity.x;
-                jumpAction(force);
-            }
-        }
-        if(jumpInput)
-        {
-            if(!jump)
-            {
-                jumpHold = jumpHoldMax;
-                jumpInput = false;
-            }
-        }
-    }
-    void wallJumpController()
-    {
-        if (jump)
-        {
-            if (wallJumpInput)
-            {
-                if (Input.GetButtonDown(Inputs.jump) && (checkGrounded() || checkWallCling()))
-                {
-                    AudioSource.PlayClipAtPoint(jumpSound, transform.position);
-                }
-                Vector2 jumpVect = (Vector2.up + (-Vector2.right * wallJumpDir)) * jumpVel;
-                jumpAction(jumpVect / wallJumpVelMod);
-                wallJumpInput = false;
-            }
-        }
-    }
-
-    void jumpAction(Vector2 jumpVector)
-    {
-        float height = jumpCurve.Evaluate(jumpHold / jumpHoldMax);
-        Vector2 calcVel = new Vector2(jumpVector.x, jumpVector.y * height);
-        rigid.velocity = calcVel;
-    }
+    }*/
 
     //Scanning and recording interactions
     void scanController()
@@ -443,12 +337,7 @@ public class player : MonoBehaviour
         Vector2 size = GetComponent<Collider2D>().bounds.size;
         RaycastHit2D checkHit = Physics2D.BoxCast(pos, size, 0, dir, jumpCheckBuffer, jumpableLayers);
         if (checkHit && checkHit.collider != null)
-        {
-            if(!jump)
-            {
-                jumpHold = 0;
-            }
-
+        { 
             return true;
         }
         else
@@ -466,44 +355,16 @@ public class player : MonoBehaviour
         size.y = size.y / wallJumpCheckMod;
         RaycastHit2D checkHitL = Physics2D.BoxCast(pos, size, 0, lDir, jumpCheckBuffer, wallJumpableLayers);
         RaycastHit2D checkHitR = Physics2D.BoxCast(pos, size, 0, rDir, jumpCheckBuffer, wallJumpableLayers);
-        if (hor != 0)
+        if (checkHitL && checkHitL.collider != null && controllerInput.horAxis() < 0)
         {
-            if (checkHitL && checkHitL.collider != null && hor < 0)
-            {
-                if (!jump)
-                {
-                    wallJumpInput = true;
-                    wallJumpDir = hor;
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else if (checkHitR && checkHitR.collider != null && hor > 0)
-            {
-                if (!jump)
-                {
-                    wallJumpInput = true;
-                    wallJumpDir = hor;
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-        
-                wallJumpInput = false;
-                return false;
-            }
+            return true;
+        }
+        else if (checkHitR && checkHitR.collider != null && controllerInput.horAxis() > 0)
+        {
+            return true;
         }
         else
         {
-            wallJumpInput = false;
             return false;
         }
     }
@@ -543,93 +404,82 @@ public class player : MonoBehaviour
         return false;
     }
 
-    //states
-    
-    void groundedState()
-    {
-        weaponController();
-        movementController();
-        jumpController();
-        dashController();
-    }
-    void jumpedState()
-    {
-        weaponController();
-        movementController();
-        dashController();
-    }
-    void wallClingState()
-    {
-        wallJumpController();
-        movementController();
-    }
-    void wallJumpState()
-    {
-        wallJumpController();
-    }
-    void dashState()
-    {
-        dashController();
-    }
-    void knockbackState()
-    {
-        knockbackController();
-    }
-    void scanState()
-    {
-        scanController();
-        recordController();
-    }
-
     //state control
+    void runState(actionsController target)
+    {
+        if (target != null)
+        {
+            target.update(controllerInput);
+        }
+    }
     void stateMachine()
     {
-        if (knockback)
+        Debug.Log(currentState);
+        switch (currentState)
         {
-            activeState = knockbackState;
-        }
-        else if (checkGrounded())
-        {
-            if (inDash)
-            {
-                activeState = dashState;
-            }
-            else
-            {
-                activeState = groundedState;
-            }
-        }
-        else if (checkWallCling())
-        {
-            activeState = wallClingState;
-        }
-        else if(activeState == wallClingState && jumpOnce)
-        {
-            activeState = wallJumpState;
-        }
-        else if (inDash)
-        {
-            activeState = dashState;
-        }
-
-        if (activeState != null)
-        {
-            activeState();
+            case state.grounded:
+                runState(motor);
+                if (controllerInput.jumpOnce())
+                {
+                    currentState = state.jumping;
+                }
+                break;
+            case state.jumping:
+                runState(jumpController);
+                runState(motor);
+                if (!controllerInput.jump())
+                {
+                    currentState = state.inAir;
+                }
+                break;
+            case state.onWall:
+                runState(wallJumpController);
+                runState(motor);
+                if (controllerInput.jumpOnce())
+                {
+                    currentState = state.offWall;
+                }
+                if(checkGrounded())
+                {
+                    currentState = state.grounded;
+                }
+                break;
+            case state.offWall:
+                if(checkGrounded())
+                {
+                    currentState = state.grounded;
+                }
+                if (checkWallCling())
+                {
+                    currentState = state.onWall;
+                }
+                break;
+            case state.inAir:
+                runState(motor);
+                if (checkGrounded())
+                {
+                    currentState = state.grounded;
+                }
+                if (checkWallCling())
+                {
+                    currentState = state.onWall;
+                }
+                break;
         }
         constantStates();
     }
 
     void constantStates()
     {
-        scanState();
+
     }
 
     void animStateMachine()
     {
-        anim.SetFloat("Direction", lastDir);
+        anim.SetFloat("Direction", controllerInput.horAxis());
         anim.SetBool("isShooting", fireWeapon);
         anim.SetBool("isGrounded", checkGrounded());
-        if (hor != 0)
+        if (controllerInput.horAxis() != 0)
         {
             anim.SetBool("isMoving", true);
         }
