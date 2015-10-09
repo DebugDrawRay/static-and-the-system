@@ -161,65 +161,6 @@ public class player : MonoBehaviour
         animStateMachine();
     }
 
-    //equipment controllers
-    /*void switchCurrentGun()
-    {
-        if(switchGuns)
-        {
-            int length = System.Enum.GetNames(typeof(guns)).Length - 1;
-            currentGun = (guns)(int)currentGun + 1;
-
-            if ((int)currentGun > length)
-            {
-                currentGun = (guns)0;
-            }
-        }
-    }
-
-    void checkEquipedGun()
-    {
-        if(currentGun == guns.bitGun)
-        {
-            proj = bitGun;
-        }
-        else if(currentGun == guns.recordGun)
-        {
-            proj = recordGun;
-        }
-    }
-
-    void checkEquipment()
-    {
-        checkEquipedGun();
-    }
-
-    //movement 
-
-    void dashController()
-    {
-        if (dash)
-        {
-            if (!inDash)
-            {
-                //AudioSource.PlayClipAtPoint(dashSound, transform.position);
-                Vector2 newDir = Vector2.right * lastDir;
-                Vector2 addDash = newDir * dashForce;
-                rigid.AddForce(addDash);
-                Instantiate(dashCloud, transform.position, Quaternion.identity);
-                inDash = true;
-            }
-        }
-        if (inDash)
-        {
-            currentDashLength -= Time.deltaTime;
-            if (currentDashLength <= 0)
-            {
-                inDash = false;
-                currentDashLength = dashLength;
-            }
-        }
-    }*/
-
     //Scanning and recording interactions
     void scanController()
     {
@@ -308,21 +249,6 @@ public class player : MonoBehaviour
         Instantiate(recordAnim, origin, Quaternion.identity);
     }
 
-    //bang bangs
-    /*void weaponController()
-    {
-        if (fireWeapon)
-        {
-            Vector3 posX = ((transform.right * lastDir) / projOffsetX);
-            Vector3 posY = -(transform.up / projOffsetY);
-            Vector3 pos = posX + posY;
-            GameObject newProj = Instantiate(proj, transform.position + pos, Quaternion.identity) as GameObject;
-            newProj.GetComponent<playerProjectile>().facing = lastDir;
-        }
-        switchCurrentGun();
-        checkEquipedGun();
-    }*/
-
     //collisions
     void OnTriggerEnter2D(Collider2D hit)
     {
@@ -332,6 +258,7 @@ public class player : MonoBehaviour
             knockbackDir = hit.gameObject.transform.position - transform.position;  
         }
     }
+
     bool checkGrounded()
     {
         Vector2 pos = GetComponent<Collider2D>().bounds.center;
@@ -339,7 +266,7 @@ public class player : MonoBehaviour
         Vector2 size = GetComponent<Collider2D>().bounds.size;
         RaycastHit2D checkHit = Physics2D.BoxCast(pos, size, 0, dir, jumpCheckBuffer, jumpableLayers);
         if (checkHit && checkHit.collider != null)
-        { 
+        {
             return true;
         }
         else
@@ -370,7 +297,6 @@ public class player : MonoBehaviour
             return false;
         }
     }
-
     void knockbackController()
     {
         if (currentKnockbackLength > 0)
